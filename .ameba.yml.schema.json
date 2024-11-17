@@ -27,28 +27,32 @@
       "description": "Enforces public types to be documented\nhttps://crystal-ameba.github.io/ameba/Ameba/Rule/Documentation/Documentation.html",
       "properties": {
         "Enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "Description": {
           "type": "string",
           "default": "Enforces public types to be documented"
         },
         "IgnoreClasses": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "IgnoreModules": {
           "type": "boolean",
           "default": true
         },
         "IgnoreEnums": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "IgnoreDefs": {
           "type": "boolean",
           "default": true
         },
         "IgnoreMacros": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "IgnoreMacroHooks": {
           "type": "boolean",
@@ -56,6 +60,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -103,6 +108,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -126,7 +132,8 @@
       "description": "Disallows lines longer than `MaxLength` number of symbols\nhttps://crystal-ameba.github.io/ameba/Ameba/Rule/Layout/LineLength.html",
       "properties": {
         "Enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "Description": {
           "type": "string",
@@ -138,6 +145,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -170,6 +178,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -202,6 +211,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -234,6 +244,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -266,6 +277,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -289,7 +301,8 @@
       "description": "Disallows comparison to booleans\nhttps://crystal-ameba.github.io/ameba/Ameba/Rule/Lint/ComparisonToBoolean.html",
       "properties": {
         "Enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "Description": {
           "type": "string",
@@ -297,6 +310,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -341,6 +355,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -373,6 +388,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -405,6 +421,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -437,6 +454,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -469,6 +487,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -501,6 +520,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -528,7 +548,8 @@
           "default": "Reports not formatted sources"
         },
         "FailOnError": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "Enabled": {
           "type": "boolean",
@@ -536,6 +557,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -568,6 +590,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -600,6 +623,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -632,6 +656,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -664,6 +689,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -696,6 +722,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -728,6 +755,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -760,6 +788,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -792,6 +821,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -832,6 +862,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -864,6 +895,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -896,6 +928,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -928,6 +961,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -960,6 +994,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -992,6 +1027,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1024,6 +1060,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1056,6 +1093,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1088,6 +1126,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1140,6 +1179,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1172,6 +1212,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1199,12 +1240,13 @@
           "default": "Reports invalid Crystal syntax"
         },
         "Severity": {
+          "type": "string",
           "enum": [
             "Error",
             "Warning",
             "Convention"
           ],
-          "default": "error"
+          "default": "Error"
         },
         "Enabled": {
           "type": "boolean",
@@ -1234,10 +1276,12 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "default": null
         },
         "FailOnError": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "Enabled": {
           "type": "boolean",
@@ -1245,6 +1289,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1277,6 +1322,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1309,6 +1355,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1340,10 +1387,12 @@
           "default": true
         },
         "IgnoreBlocks": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "IgnoreProcs": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "Enabled": {
           "type": "boolean",
@@ -1351,6 +1400,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1383,6 +1433,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1410,7 +1461,8 @@
           "default": "Disallows useless variable assignments"
         },
         "ExcludeTypeDeclarations": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "Enabled": {
           "type": "boolean",
@@ -1418,6 +1470,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1450,6 +1503,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1486,6 +1540,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -1518,6 +1573,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -1545,7 +1601,8 @@
           "default": "Disallows non-ascii characters in identifiers"
         },
         "IgnoreSymbols": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "Enabled": {
           "type": "boolean",
@@ -1553,6 +1610,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -1601,6 +1659,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -1674,6 +1733,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -1706,6 +1766,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -1738,6 +1799,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -1770,6 +1832,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -1802,6 +1865,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -1834,6 +1898,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -1878,6 +1943,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -1910,6 +1976,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -1942,6 +2009,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -1984,6 +2052,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -2016,6 +2085,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -2061,6 +2131,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -2093,6 +2164,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -2137,6 +2209,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -2178,6 +2251,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -2210,6 +2284,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -2242,6 +2317,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -2274,6 +2350,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -2316,6 +2393,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Warning",
           "enum": [
             "Error",
             "Warning",
@@ -2339,7 +2417,8 @@
       "description": "Check for conditionals that can be replaced with guard clauses\nhttps://crystal-ameba.github.io/ameba/Ameba/Rule/Style/GuardClause.html",
       "properties": {
         "Enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "Description": {
           "type": "string",
@@ -2347,6 +2426,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -2393,6 +2473,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -2425,6 +2506,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -2448,7 +2530,8 @@
       "description": "Disallows usage of large numbers without underscore\nhttps://crystal-ameba.github.io/ameba/Ameba/Rule/Style/LargeNumbers.html",
       "properties": {
         "Enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "Description": {
           "type": "string",
@@ -2460,6 +2543,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -2492,6 +2576,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -2519,10 +2604,12 @@
           "default": "Disallows redundant parentheses around control expressions"
         },
         "ExcludeTernary": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "AllowSafeAssignment": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "Enabled": {
           "type": "boolean",
@@ -2530,6 +2617,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -2562,6 +2650,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -2602,6 +2691,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -2642,6 +2732,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -2674,6 +2765,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -2717,13 +2809,15 @@
           "default": true
         },
         "ExcludeSetters": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "MaxLineLength": {
           "type": [
             "number",
             "null"
-          ]
+          ],
+          "default": null
         },
         "MaxLength": {
           "type": [
@@ -2738,6 +2832,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",
@@ -2770,6 +2865,7 @@
         },
         "Severity": {
           "type": "string",
+          "default": "Convention",
           "enum": [
             "Error",
             "Warning",

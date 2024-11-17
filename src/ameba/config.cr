@@ -361,99 +361,104 @@ class Ameba::Config
         end
       end
 
-      def self.to_json_schema(b : JSON::Builder)
-        b.string(rule_name)
-        b.object do
-          b.field("type", "object")
-          b.field("title", rule_name)
+      def self.to_json_schema(bld : JSON::Builder)
+        bld.string(rule_name)
+        bld.object do
+          bld.field("type", "object")
+          bld.field("title", rule_name)
           {% if properties["description".id] %}
-          b.field("description", {{ properties["description".id][:default] }} + "\nhttps://crystal-ameba.github.io/ameba/Ameba/Rule/#{rule_name}.html")
+          bld.field("description", {{ properties["description".id][:default] }} + "\nhttps://crystal-ameba.github.io/ameba/Ameba/Rule/#{rule_name}.html")
           {% else %}
-          b.field("description", "https://crystal-ameba.github.io/ameba/Ameba/Rule/#{rule_name}.html")
+          bld.field("description", "https://crystal-ameba.github.io/ameba/Ameba/Rule/#{rule_name}.html")
           {% end %}
 
-          b.string("properties")
-          b.object do
+          bld.string("properties")
+          bld.object do
             {% for prop_name in properties %}
               {% prop = properties[prop_name] %}
+              {% default_set = false %}
 
-              b.string({{ prop[:key] }})
-              b.object do
+              bld.string({{ prop[:key] }})
+              bld.object do
                 {% if prop[:type] == String %}
-                  b.field("type", "string")
+                  bld.field("type", "string")
                 {% elsif prop[:type] == Int32 %}
-                  b.field("type", "number")
+                  bld.field("type", "number")
                 {% elsif prop[:type] == Bool %}
-                  b.field("type", "boolean")
+                  bld.field("type", "boolean")
                 {% elsif prop[:type] == Nil %}
-                  b.field("type", "null")
+                  bld.field("type", "null")
                 {% elsif prop[:type].stringify == "::Union(String, ::Nil)" %}
-                  b.string("type")
-                  b.array do
-                    b.string("string")
-                    b.string("null")
+                  bld.string("type")
+                  bld.array do
+                    bld.string("string")
+                    bld.string("null")
                   end
                 {% elsif prop[:type].stringify == "::Union(Int32, ::Nil)" %}
-                  b.string("type")
-                  b.array do
-                    b.string("number")
-                    b.string("null")
+                  bld.string("type")
+                  bld.array do
+                    bld.string("number")
+                    bld.string("null")
                   end
                 {% elsif prop[:type] == Ameba::Severity %}
-                  b.string("enum")
-                  b.array do
-                    b.string("Error")
-                    b.string("Warning")
-                    b.string("Convention")
+                  bld.field("type", "string")
+                  bld.string("enum")
+                  bld.array do
+                    bld.string("Error")
+                    bld.string("Warning")
+                    bld.string("Convention")
                   end
+                  bld.field("default", {{ prop[:default].capitalize }})
+                  {% default_set = true %}
                 {% else %}
-                  b.field("type", "array")
+                  bld.field("type", "array")
 
-                  b.string("items")
-                  b.object do
-                    b.field("type", "string")
+                  bld.string("items")
+                  bld.object do
+                    bld.field("type", "string")
                   end
                 {% end %}
 
-                {% if prop[:default] %}
-                  b.field("default", {{ prop[:default] }})
+                {% if !prop[:default].is_a?(Ameba::Severity) && !default_set %}
+                  bld.field("default", {{ prop[:default] }})
                 {% end %}
               end
             {% end %}
 
             {% unless properties["enabled".id] %}
-              b.string("Enabled")
-              b.object do
-                b.field("type", "boolean")
-                b.field("default", true)
+              bld.string("Enabled")
+              bld.object do
+                bld.field("type", "boolean")
+                bld.field("default", true)
               end
             {% end %}
 
             {% unless properties["severity".id] %}
-              b.string("Severity")
-              b.object do
-                b.field("type", "string")
-                b.string("enum")
-                b.array do
-                  b.string("Error")
-                  b.string("Warning")
-                  b.string("Convention")
+              bld.string("Severity")
+              bld.object do
+                bld.field("type", "string")
+                bld.field("default", default_severity.to_s)
+                bld.string("enum")
+                bld.array do
+                  bld.string("Error")
+                  bld.string("Warning")
+                  bld.string("Convention")
                 end
               end
             {% end %}
 
             {% unless properties["excluded".id] %}
-              b.string("Excluded")
-              b.object do
-                b.string("type")
-                b.array do
-                  b.string("array")
-                  b.string("string")
+              bld.string("Excluded")
+              bld.object do
+                bld.string("type")
+                bld.array do
+                  bld.string("array")
+                  bld.string("string")
                 end
 
-                b.string("items")
-                b.object do
-                  b.field("type", "string")
+                bld.string("items")
+                bld.object do
+                  bld.field("type", "string")
                 end
               end
             {% end %}
