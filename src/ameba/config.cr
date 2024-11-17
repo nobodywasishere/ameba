@@ -360,6 +360,106 @@ class Ameba::Config
           SemanticVersion.parse(version)
         end
       end
+
+      def self.to_json_schema(b : JSON::Builder)
+        b.string(rule_name)
+        b.object do
+          b.field("type", "object")
+          b.field("title", rule_name)
+          {% if properties["description".id] %}
+          b.field("description", {{ properties["description".id][:default] }} + "\nhttps://crystal-ameba.github.io/ameba/Ameba/Rule/#{rule_name}.html")
+          {% else %}
+          b.field("description", "https://crystal-ameba.github.io/ameba/Ameba/Rule/#{rule_name}.html")
+          {% end %}
+
+          b.string("properties")
+          b.object do
+            {% for prop_name in properties %}
+              {% prop = properties[prop_name] %}
+
+              b.string({{ prop[:key] }})
+              b.object do
+                {% if prop[:type] == String %}
+                  b.field("type", "string")
+                {% elsif prop[:type] == Int32 %}
+                  b.field("type", "number")
+                {% elsif prop[:type] == Bool %}
+                  b.field("type", "boolean")
+                {% elsif prop[:type] == Nil %}
+                  b.field("type", "null")
+                {% elsif prop[:type].stringify == "::Union(String, ::Nil)" %}
+                  b.string("type")
+                  b.array do
+                    b.string("string")
+                    b.string("null")
+                  end
+                {% elsif prop[:type].stringify == "::Union(Int32, ::Nil)" %}
+                  b.string("type")
+                  b.array do
+                    b.string("number")
+                    b.string("null")
+                  end
+                {% elsif prop[:type] == Ameba::Severity %}
+                  b.string("enum")
+                  b.array do
+                    b.string("Error")
+                    b.string("Warning")
+                    b.string("Convention")
+                  end
+                {% else %}
+                  b.field("type", "array")
+
+                  b.string("items")
+                  b.object do
+                    b.field("type", "string")
+                  end
+                {% end %}
+
+                {% if prop[:default] %}
+                  b.field("default", {{ prop[:default] }})
+                {% end %}
+              end
+            {% end %}
+
+            {% unless properties["enabled".id] %}
+              b.string("Enabled")
+              b.object do
+                b.field("type", "boolean")
+                b.field("default", true)
+              end
+            {% end %}
+
+            {% unless properties["severity".id] %}
+              b.string("Severity")
+              b.object do
+                b.field("type", "string")
+                b.string("enum")
+                b.array do
+                  b.string("Error")
+                  b.string("Warning")
+                  b.string("Convention")
+                end
+              end
+            {% end %}
+
+            {% unless properties["excluded".id] %}
+              b.string("Excluded")
+              b.object do
+                b.string("type")
+                b.array do
+                  b.string("array")
+                  b.string("string")
+                end
+
+                b.string("items")
+                b.object do
+                  b.field("type", "string")
+                end
+              end
+            {% end %}
+          end
+        end
+      end
     end
 
     macro included
