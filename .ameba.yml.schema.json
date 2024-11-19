@@ -2192,15 +2192,24 @@
           "default": "Identifies usage of excessive collection allocations"
         },
         "CallNames": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": {
-            "codepoints": "each_codepoint",
-            "graphemes": "each_grapheme",
-            "chars": "each_char",
-            "lines": "each_line"
+          "type": "object",
+          "properties": {
+            "codepoints": {
+              "type": "string",
+              "default": "each_codepoint"
+            },
+            "graphemes": {
+              "type": "string",
+              "default": "each_grapheme"
+            },
+            "chars": {
+              "type": "string",
+              "default": "each_char"
+            },
+            "lines": {
+              "type": "string",
+              "default": "each_line"
+            }
           }
         },
         "Enabled": {

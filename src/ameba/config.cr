@@ -410,13 +410,29 @@ class Ameba::Config
                   end
                   bld.field("default", {{ prop[:default].capitalize }})
                   {% default_set = true %}
-                {% else %}
+                {% elsif prop[:default].is_a?(ArrayLiteral) %}
                   bld.field("type", "array")
 
                   bld.string("items")
                   bld.object do
                     bld.field("type", "string")
                   end
+                {% elsif prop[:default].is_a?(HashLiteral) %}
+                  bld.field("type", "object")
+
+                  bld.string("properties")
+                  bld.object do
+                    {% for pr in prop[:default] %}
+                    bld.string({{ pr }})
+                    bld.object do
+                      bld.field("type", "string")
+                      bld.field("default", {{ prop[:default][pr] }})
+                    end
+                    {% end %}
+                  end
+                  {% default_set = true %}
+                {% else %}
+                  {% raise "Unhandled schema type for #{prop}" %}
                 {% end %}
 
                 {% if !prop[:default].is_a?(Ameba::Severity) && !default_set %}
