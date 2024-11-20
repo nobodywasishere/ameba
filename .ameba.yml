@@ -5,3 +5,10 @@ Documentation/DocumentationAdmonition:
 Lint/Typos:
   Excluded:
     - spec/ameba/rule/lint/typos_spec.cr
+
+Naming/KeywordNames:
+  Enabled: true
+  AllowedNames:
+    - with
+    - of
+    - type
