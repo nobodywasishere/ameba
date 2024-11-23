@@ -1,4 +1,5 @@
 require "yaml"
+require "ecr/processor"
 require "./glob_utils"
 
 # A configuration entry for `Ameba::Runner`.
