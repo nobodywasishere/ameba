@@ -10,17 +10,17 @@ class ECR::Lexer
         if is_output
           raise Crystal::SyntaxException.new(
             "Unexpected end of file inside <%= ...",
-            @line_number - 1, @column_number, ""
+            @line_number, @column_number, ""
           )
         elsif is_escape
           raise Crystal::SyntaxException.new(
             "Unexpected end of file inside <%% ...",
-            @line_number - 1, @column_number, ""
+            @line_number, @column_number, ""
           )
         else
           raise Crystal::SyntaxException.new(
             "Unexpected end of file inside <% ...",
-            @line_number - 1, @column_number, ""
+            @line_number, @column_number, ""
           )
         end
       when '\n'
@@ -45,7 +45,7 @@ class ECR::Lexer
             if current_char != '>'
               raise Crystal::SyntaxException.new(
                 "Expecting '>' after '-%'",
-                @line_number - 1, @column_number, ""
+                @line_number, @column_number, ""
               )
             end
 
