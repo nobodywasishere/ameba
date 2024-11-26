@@ -453,7 +453,7 @@ class Ameba::Config
               bld.string("SinceVersion")
               bld.object do
                 bld.field("type", "string")
-                bld.field("default", {{ properties["since_version".id][:default] }})
+                bld.field("default", "")
               end
             {% end %}
 
