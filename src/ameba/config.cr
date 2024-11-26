@@ -449,6 +449,14 @@ class Ameba::Config
               end
             {% end %}
 
+            {% unless properties["since_version".id] %}
+              bld.string("SinceVersion")
+              bld.object do
+                bld.field("type", "string")
+                bld.field("default", {{ properties["since_version".id][:default] }})
+              end
+            {% end %}
+
             {% unless properties["severity".id] %}
               bld.string("Severity")
               bld.object do
