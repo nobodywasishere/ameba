@@ -27,7 +27,6 @@ module Ameba::Rule::Lint
     properties do
       since_version "1.7.0"
       description "Disallows method calls with no parentheses and a logical operator in the argument list"
-      other_option %w(1 2 3)
     end
 
     MSG = "Use parentheses in the method call to avoid confusion about precedence"
