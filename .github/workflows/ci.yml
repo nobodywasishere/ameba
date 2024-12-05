@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master, nobody/test-ci-formatter]
+    branches: [master]
   pull_request:
     types: [opened, synchronize, reopened]
   schedule:
@@ -77,4 +77,4 @@ jobs:
           rm -rf ameba
 
       - name: Run Ameba Linter
-        run: bin/ameba -f github_ci
+        run: bin/ameba -c .ameba.yml -f github_ci
