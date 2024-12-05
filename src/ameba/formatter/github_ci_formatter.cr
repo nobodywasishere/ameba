@@ -37,4 +37,3 @@ module Ameba::Formatter
       end
     end
   end
-end
