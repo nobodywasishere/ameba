@@ -24,7 +24,7 @@ module Ameba::Formatter
         output << issue.message.gsub("\n", "\\n")
         output << "\n"
       end
-    end
+
 
     private def command_name(severity : Severity) : String
       case severity
@@ -37,3 +37,4 @@ module Ameba::Formatter
       end
     end
   end
+end
