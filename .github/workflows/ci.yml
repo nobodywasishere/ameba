@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, nobody/test-ci-formatter]
   pull_request:
     types: [opened, synchronize, reopened]
   schedule:
@@ -44,3 +44,37 @@ jobs:
 
       - name: Run ameba linter
         run: make lint
+
+  github-ci-lint-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ameba-version: ["nobody/github-ci-formatter"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Crystal
+        uses: crystal-lang/install-crystal@v1
+
+      - name: Cache Ameba binary
+        id: cache-ameba
+        uses: actions/cache@v3
+        with:
+          path: bin/ameba
+          key: ${{ runner.os }}-ameba-${{ matrix.ameba-version }}
+
+      - name: Build Ameba
+        if: steps.cache-ameba.outputs.cache-hit != 'true'
+        run: |
+          git clone --branch ${{ matrix.ameba-version }} --single-branch https://github.com/nobodywasishere/ameba.git
+          cd ameba
+          make
+          mkdir -p ../bin
+          mv bin/ameba ../bin/ameba
+          cd ..
+          rm -rf ameba
+
+      - name: Run Ameba Linter
+        run: bin/ameba -f github_ci
