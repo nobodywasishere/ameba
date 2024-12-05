@@ -11,13 +11,13 @@ module Ameba::Formatter
         output << "file="
         output << source.path
         output << ",line="
-        output << loc.line_number + 1
+        output << loc.line_number
         output << ",endLine="
-        output << end_loc.line_number + 1
+        output << end_loc.line_number
         output << ",col="
-        output << loc.column_number + 1
+        output << loc.column_number
         output << ",endColumn="
-        output << end_loc.column_number + 1
+        output << end_loc.column_number
         output << ",title="
         output << issue.rule.name
         output << "::"
