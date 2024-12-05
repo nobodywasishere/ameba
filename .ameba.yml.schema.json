@@ -13,6 +13,10 @@
         "type": "string"
       }
     },
+    "Version": {
+      "type": "string",
+      "description": "the version of ameba to limit rules to"
+    },
     "Globs": {
       "type": "array",
       "title": "globbed files and paths",
@@ -1428,6 +1432,43 @@
         "Enabled": {
           "type": "boolean",
           "default": true
+        },
+        "Excluded": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Lint/TrailingRescueException": {
+      "type": "object",
+      "title": "Lint/TrailingRescueException",
+      "description": "Disallows trailing rescue with a path\nhttps://crystal-ameba.github.io/ameba/Ameba/Rule/Lint/TrailingRescueException.html",
+      "properties": {
+        "SinceVersion": {
+          "type": "string",
+          "default": "1.7.0"
+        },
+        "Description": {
+          "type": "string",
+          "default": "Disallows trailing rescue with a path"
+        },
+        "Enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "Severity": {
+          "type": "string",
+          "default": "Warning",
+          "enum": [
+            "Error",
+            "Warning",
+            "Convention"
+          ]
         },
         "Excluded": {
           "type": [
@@ -2862,6 +2903,43 @@
         "IntMinDigits": {
           "type": "number",
           "default": 6
+        },
+        "Severity": {
+          "type": "string",
+          "default": "Convention",
+          "enum": [
+            "Error",
+            "Warning",
+            "Convention"
+          ]
+        },
+        "Excluded": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Style/MultilineCurlyBlock": {
+      "type": "object",
+      "title": "Style/MultilineCurlyBlock",
+      "description": "Disallows multi-line blocks using curly block syntax\nhttps://crystal-ameba.github.io/ameba/Ameba/Rule/Style/MultilineCurlyBlock.html",
+      "properties": {
+        "SinceVersion": {
+          "type": "string",
+          "default": "1.7.0"
+        },
+        "Description": {
+          "type": "string",
+          "default": "Disallows multi-line blocks using curly block syntax"
+        },
+        "Enabled": {
+          "type": "boolean",
+          "default": true
         },
         "Severity": {
           "type": "string",

@@ -22,6 +22,12 @@ schema = JSON.build(2) do |bld|
         end
       end
 
+      bld.string("Version")
+      bld.object do
+        bld.field("type", "string")
+        bld.field("description", "the version of ameba to limit rules to")
+      end
+
       bld.string("Globs")
       bld.object do
         bld.field("type", "array")
