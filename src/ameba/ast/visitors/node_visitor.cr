@@ -41,6 +41,8 @@ module Ameba::AST
       Var,
       When,
       While,
+      TypeDeclaration,
+      Arg,
     }
 
     @skip : Array(Crystal::ASTNode.class)?
