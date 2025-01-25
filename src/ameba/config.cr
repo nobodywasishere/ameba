@@ -96,6 +96,8 @@ class Ameba::Config
   # Returns `true` if correctable issues should be autocorrected.
   property? autocorrect = false
 
+  property? semantic = false
+
   # Returns a filename if reading source file from STDIN.
   property stdin_filename : String?
 

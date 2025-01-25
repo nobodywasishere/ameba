@@ -49,6 +49,8 @@ module Ameba
     # Returns `true` if correctable issues should be autocorrected.
     private getter? autocorrect : Bool
 
+    private getter? semantic : Bool
+
     # Returns an ameba version up to which the rules should be ran.
     property version : SemanticVersion?
 
@@ -68,11 +70,12 @@ module Ameba
         config.formatter,
         config.severity,
         config.autocorrect?,
+        config.semantic?,
         config.version,
       )
     end
 
-    protected def initialize(rules, sources, @formatter, @severity, @autocorrect = false, @version = nil)
+    protected def initialize(rules, sources, @formatter, @severity, @autocorrect = false, @semantic = false, @version = nil)
       @sources = sources.sort_by(&.path)
       @rules =
         rules.select { |rule| rule_runnable?(rule, @version) }
