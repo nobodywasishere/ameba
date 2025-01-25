@@ -117,7 +117,7 @@ module Ameba
           # test the semantic rules
           run_sources(context)
         rescue ex
-          puts "failed to run semantic on #{entrypoint}\n\n#{ex}\n\n#{ex.backtrace.try(&.join("\n"))}"
+          puts "failed to run semantic on #{entrypoint}\n\n#{ex.class}\n#{ex}\n\n#{ex.backtrace.try(&.join("\n"))}"
           exit 1
         end
       else

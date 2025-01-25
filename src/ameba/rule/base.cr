@@ -47,10 +47,6 @@ module Ameba::Rule
     def test(source : Source, node : Crystal::ASTNode, *opts)
     end
 
-    def test(source : DoesntExist)
-      source.method_isnt_on_this_object
-    end
-
     # A convenient addition to `#test` method that does the same
     # but returns a passed in `source` as an addition.
     #
