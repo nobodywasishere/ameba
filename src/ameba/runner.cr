@@ -106,10 +106,32 @@ module Ameba
     def run
       @formatter.started @sources
 
+      if semantic?
+        # TODO: collect entrypoints
+        entrypoints = ["src/cli.cr"]
+
+        entrypoints.each do |entrypoint|
+          # for each entrypoint, perform a top level semantic
+          context = SemanticContext.for_entrypoint(entrypoint)
+
+          # test the semantic rules
+          run_sources(context)
+        rescue ex
+          puts "failed to run semantic on #{entrypoint}\n\n#{ex}\n\n#{ex.backtrace.try(&.join("\n"))}"
+          exit 1
+        end
+      else
+        run_sources
+      end
+
+      self
+    end
+
+    private def run_sources(context = nil) : Nil
       channels = @sources.map { Channel(Exception?).new }
       @sources.zip(channels).each do |source, channel|
         spawn do
-          run_source(source)
+          run_source(source, context)
         rescue e
           channel.send(e)
         else
@@ -120,13 +142,11 @@ module Ameba
       channels.each do |chan|
         chan.receive.try { |e| raise e }
       end
-
-      self
     ensure
       @formatter.finished @sources
     end
 
-    private def run_source(source) : Nil
+    private def run_source(source, context : SemanticContext? = nil) : Nil
       @formatter.source_started source
 
       # This variable is a 2D array used to track corrected issues after each
@@ -146,7 +166,7 @@ module Ameba
 
         @rules.each do |rule|
           next if rule.excluded?(source)
-          rule.test(source)
+          rule.test(source, context)
         end
         check_unneeded_directives(source)
         break unless autocorrect? && source.correct?

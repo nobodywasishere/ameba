@@ -39,8 +39,16 @@ module Ameba::Rule
       AST::NodeVisitor.new self, source
     end
 
+    def test(source : Source, context : SemanticContext?)
+      test(source)
+    end
+
     # NOTE: Can't be abstract
     def test(source : Source, node : Crystal::ASTNode, *opts)
+    end
+
+    def test(source : DoesntExist)
+      source.method_isnt_on_this_object
     end
 
     # A convenient addition to `#test` method that does the same
@@ -50,8 +58,8 @@ module Ameba::Rule
     # source = MyRule.new.catch(source)
     # source.valid?
     # ```
-    def catch(source : Source)
-      source.tap { test source }
+    def catch(source : Source, context : SemanticContext? = nil)
+      source.tap { test source, context }
     end
 
     # Returns a name of this rule, which is basically a class name.
