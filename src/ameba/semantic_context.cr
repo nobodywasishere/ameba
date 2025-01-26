@@ -20,6 +20,16 @@ require "compiler/crystal/macros/**"
 require "compiler/crystal/codegen/**"
 
 class Ameba::SemanticContext
+  def self.for_entrypoint(sources : Array(Source)) : SemanticContext
+    EnvironmentConfig.run
+
+    crystal_sources = sources.map { |i| Crystal::Compiler::Source.new(i.path, i.code) }
+
+    result = semantic(crystal_sources)
+
+    new(result.program, result.node)
+  end
+
   def self.for_entrypoint(path : String) : SemanticContext
     EnvironmentConfig.run
 

@@ -21,13 +21,13 @@ module Ameba::Formatter
     # A corresponding source is passed as an argument.
     #
     # WARNING: This method needs to be MT safe
-    def source_started(source : Source) : Nil; end
+    def source_started(source : Source, context : Ameba::SemanticContext? = nil) : Nil; end
 
     # Callback that indicates when source inspection is finished.
     # A corresponding source is passed as an argument.
     #
     # WARNING: This method needs to be MT safe
-    def source_finished(source : Source) : Nil; end
+    def source_finished(source : Source, context : Ameba::SemanticContext? = nil) : Nil; end
 
     # Callback that indicates when inspection is finished.
     # A list of inspected sources is passed as an argument.

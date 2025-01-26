@@ -18,7 +18,7 @@ module Ameba::Formatter
     end
 
     # Reports a result of the inspection of a corresponding source.
-    def source_finished(source : Source) : Nil
+    def source_finished(source : Source, context : SemanticContext? = nil) : Nil
       sym = source.valid? ? ".".colorize(:green) : "F".colorize(:red)
       @mutex.synchronize { output << sym }
     end

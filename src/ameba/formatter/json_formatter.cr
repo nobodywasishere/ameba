@@ -70,7 +70,7 @@ module Ameba::Formatter
       @result.summary.target_sources_count = sources.size
     end
 
-    def source_finished(source : Source) : Nil
+    def source_finished(source : Source, context : SemanticContext? = nil) : Nil
       json_source = AsJSON::Source.new source.path
 
       source.issues.each do |issue|

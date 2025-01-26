@@ -16,7 +16,7 @@ module Ameba::Formatter
     end
 
     # Reports a result of the inspection of a corresponding source.
-    def source_finished(source : Source) : Nil
+    def source_finished(source : Source, context : SemanticContext? = nil) : Nil
       source.issues.each do |issue|
         next if issue.disabled?
 

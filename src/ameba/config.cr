@@ -98,6 +98,8 @@ class Ameba::Config
 
   property? semantic = false
 
+  property entrypoints : Array(String)
+
   # Returns a filename if reading source file from STDIN.
   property stdin_filename : String?
 
@@ -116,6 +118,7 @@ class Ameba::Config
     @rule_groups = @rules.group_by &.group
     @excluded = load_array_section(config, "Excluded")
     @globs = load_array_section(config, "Globs", DEFAULT_GLOBS)
+    @entrypoints = load_array_section(config, "Entrypoints")
 
     if version = config["Version"]?.try(&.as_s).presence
       self.version = version

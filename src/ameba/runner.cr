@@ -43,6 +43,8 @@ module Ameba
     # A syntax rule which always inspects a source first
     @syntax_rule = Rule::Lint::Syntax.new
 
+    @top_level_semantic_rule = Rule::Lint::TopLevelSemantic.new
+
     # Checks for unneeded disable directives. Always inspects a source last
     @unneeded_disable_directive_rule : Rule::Base?
 
@@ -50,6 +52,8 @@ module Ameba
     private getter? autocorrect : Bool
 
     private getter? semantic : Bool
+
+    @entrypoints : Array(String)
 
     # Returns an ameba version up to which the rules should be ran.
     property version : SemanticVersion?
@@ -67,6 +71,7 @@ module Ameba
       initialize(
         config.rules,
         config.sources,
+        config.entrypoints,
         config.formatter,
         config.severity,
         config.autocorrect?,
@@ -75,7 +80,7 @@ module Ameba
       )
     end
 
-    protected def initialize(rules, sources, @formatter, @severity, @autocorrect = false, @semantic = false, @version = nil)
+    protected def initialize(rules, sources, @entrypoints, @formatter, @severity, @autocorrect = false, @semantic = false, @version = nil)
       @sources = sources.sort_by(&.path)
       @rules =
         rules.select { |rule| rule_runnable?(rule, @version) }
@@ -106,13 +111,19 @@ module Ameba
     def run
       @formatter.started @sources
 
-      if semantic?
-        # TODO: collect entrypoints
-        entrypoints = ["src/cli.cr"]
+      entrypoint_sources = Array(Source).new
 
-        entrypoints.each do |entrypoint|
+      if semantic? && !@entrypoints.empty?
+        @entrypoints.each do |entrypoint|
+          entrypoint_sources << (source = Source.new(path: entrypoint, code: File.read(entrypoint)))
+
           # for each entrypoint, perform a top level semantic
-          context = SemanticContext.for_entrypoint(entrypoint)
+          context : SemanticContext? = begin
+            @formatter.source_started source, nil
+            @top_level_semantic_rule.test(source)
+          ensure
+            @formatter.source_finished source, nil
+          end
 
           # test the semantic rules
           run_sources(context)
@@ -125,6 +136,12 @@ module Ameba
       end
 
       self
+    ensure
+      if entrypoint_sources
+        @sources.concat(entrypoint_sources)
+      end
+
+      @formatter.finished @sources
     end
 
     private def run_sources(context = nil) : Nil
@@ -142,12 +159,10 @@ module Ameba
       channels.each do |chan|
         chan.receive.try { |e| raise e }
       end
-    ensure
-      @formatter.finished @sources
     end
 
     private def run_source(source, context : SemanticContext? = nil) : Nil
-      @formatter.source_started source
+      @formatter.source_started source, context
 
       # This variable is a 2D array used to track corrected issues after each
       # inspection iteration. This is used to output meaningful infinite loop
@@ -187,7 +202,7 @@ module Ameba
       source.issues.sort_by! do |issue|
         issue.location || missing_location
       end
-      @formatter.source_finished source
+      @formatter.source_finished source, context
     end
 
     # Explains an issue at a specified *location*.

@@ -1,3 +1,7 @@
+Entrypoints:
+  - src/cli.cr
+  # - spec/**/*_spec.cr
+
 Documentation/DocumentationAdmonition:
   Timezone: UTC
   Admonitions: [FIXME, BUG]

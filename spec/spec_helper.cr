@@ -242,11 +242,11 @@ module Ameba
       @started_sources = sources
     end
 
-    def source_finished(source : Source)
+    def source_finished(source : Source, context : SemanticContext? = nil)
       @started_source = source
     end
 
-    def source_started(source : Source)
+    def source_started(source : Source, context : SemanticContext? = nil)
       @finished_source = source
     end
 
