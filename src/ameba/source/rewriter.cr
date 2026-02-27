@@ -59,6 +59,12 @@ class Ameba::Source
   # The updates are organized in a tree, according to the ranges they act on
   # (where children are strictly contained by their parent).
   class Rewriter
+    # A single source update operation represented by byte offsets.
+    record Edit,
+      begin_pos : Int32,
+      end_pos : Int32,
+      replacement : String
+
     getter code : String
 
     def initialize(@code)
@@ -117,6 +123,13 @@ class Ameba::Source
           last_end = end_pos
         end
         io << code[last_end...code.size]
+      end
+    end
+
+    # Returns ordered replacement operations used to rewrite source code.
+    def edits : Array(Edit)
+      @action_root.ordered_replacements.map do |begin_pos, end_pos, replacement|
+        Edit.new(begin_pos, end_pos, replacement)
       end
     end
 

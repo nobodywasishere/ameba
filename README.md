@@ -19,6 +19,7 @@
   - [Watch a tutorial](#watch-a-tutorial)
   - [Autocorrection](#autocorrection)
   - [Explain issues](#explain-issues)
+  - [Language server](#language-server)
   - [Run in parallel](#run-in-parallel)
 - [Installation](#installation)
   - [As a project dependency:](#as-a-project-dependency)
@@ -96,6 +97,23 @@ report and paste behind the `ameba` command to check it out.
 $ ameba crystal/command/format.cr:26:83           # show explanation for the issue
 $ ameba --explain crystal/command/format.cr:26:83 # same thing
 ```
+
+### Language server
+
+Run Ameba as an LSP server over stdio:
+
+```sh
+$ ameba --lsp
+```
+
+Current LSP support includes:
+
+- `textDocument/didOpen`
+- `textDocument/didChange`
+- `textDocument/didSave`
+- `textDocument/didClose`
+- `textDocument/codeAction`
+- `codeAction/resolve`
 
 ### Run in parallel
 

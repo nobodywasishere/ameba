@@ -1,6 +1,9 @@
 require "../spec_helper"
 
 module Ameba
+  class CancelledError < Exception
+  end
+
   private def runner(files = [__FILE__], formatter = DummyFormatter.new)
     config = Config.load
     config.formatter = formatter
@@ -111,6 +114,33 @@ module Ameba
 
           expect_raises(Exception, "something went wrong") do
             Runner.new(rules, [source], formatter, default_severity).run
+          end
+        end
+      end
+
+      context "cancellation" do
+        it "calls cancellation checks while running" do
+          checks = 0
+          check = -> do
+            checks += 1
+            nil
+          end
+          rules = [ErrorRule.new] of Rule::Base
+          source = Source.new("a = 1", "source.cr")
+
+          Runner.new(rules, [source], formatter, default_severity, false, nil, Path[Dir.current], check).run
+          checks.should be > 0
+        end
+
+        it "aborts when cancellation check raises" do
+          check = -> do
+            raise CancelledError.new("cancelled")
+          end
+          rules = [ErrorRule.new] of Rule::Base
+          source = Source.new("a = 1", "source.cr")
+
+          expect_raises(CancelledError, "cancelled") do
+            Runner.new(rules, [source], formatter, default_severity, false, nil, Path[Dir.current], check).run
           end
         end
       end

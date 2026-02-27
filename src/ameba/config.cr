@@ -109,6 +109,12 @@ class Ameba::Config
   # Returns a filename if reading source file from STDIN.
   property stdin_filename : String?
 
+  # Optional callback that can abort running inspection.
+  property cancellation_check : Proc(Nil)?
+
+  # Optional in-memory sources override used by integrations.
+  @sources_override : Array(Source)?
+
   # Returns rules grouped by rule group.
   protected getter rule_groups : Hash(String, Array(Rule::Base))
 
@@ -121,6 +127,7 @@ class Ameba::Config
     @excluded = Set(String).new,
     @autocorrect = false,
     @stdin_filename = nil,
+    @cancellation_check = nil,
     version = nil,
     formatter = nil,
   )
@@ -144,13 +151,37 @@ class Ameba::Config
   # config.sources # => list of sources pointing to files found by the wildcards
   # ```
   def sources
-    if file = stdin_filename
+    case
+    when sources = @sources_override
+      sources
+    when file = stdin_filename
       [Source.new(STDIN.gets_to_end, file)]
     else
       files.map do |path|
         Source.new(File.read(path), path)
       end
     end
+  end
+
+  # Overrides list of sources to inspect.
+  #
+  # This is useful for integrations which lint in-memory documents.
+  def sources=(sources : Array(Source))
+    @sources_override = sources
+  end
+
+  # Clears source override so `#sources` resolves from globs again.
+  def sources=(sources : Nil)
+    @sources_override = nil
+  end
+
+  # Temporarily overrides sources for the duration of the given block.
+  def with_sources_override(sources : Array(Source), &)
+    previous_sources = @sources_override
+    @sources_override = sources
+    yield
+  ensure
+    @sources_override = previous_sources
   end
 
   # Returns a list of files matching globs and excluded sections.

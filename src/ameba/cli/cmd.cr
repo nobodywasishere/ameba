@@ -25,6 +25,7 @@ module Ameba::CLI
     property? colors = true
     property? without_affected_code = false
     property? autocorrect = false
+    property? lsp = false
   end
 
   private class ExitException < Exception
@@ -47,6 +48,11 @@ module Ameba::CLI
 
       if opts.stdin_filename && opts.autocorrect?
         raise "Invalid usage: Cannot autocorrect from stdin."
+      end
+
+      if opts.lsp?
+        Ameba::LSP::Server.new.run
+        return true
       end
 
       config = config_from_opts(opts)
@@ -192,6 +198,10 @@ module Ameba::CLI
 
       parser.on("--stdin-filename FILENAME", "Read source from STDIN") do |filename|
         opts.stdin_filename = filename if filename.presence
+      end
+
+      parser.on("--lsp", "Run as a Language Server Protocol server over stdio") do
+        opts.lsp = true
       end
     end
 

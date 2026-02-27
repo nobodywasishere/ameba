@@ -37,6 +37,17 @@ class Ameba::Source
       rewriter.process.should eq "puts(:hi, :world)"
     end
 
+    it "exposes ordered edits" do
+      rewriter = Rewriter.new(code)
+      rewriter.replace(*hello, ":hi")
+      rewriter.insert_before(*world, "42, ")
+
+      rewriter.edits.should eq([
+        Rewriter::Edit.new(5, 11, ":hi"),
+        Rewriter::Edit.new(13, 13, "42, "),
+      ])
+    end
+
     it "accepts crossing deletions" do
       rewriter = Rewriter.new(code)
       rewriter.remove(hello[0], comma_space[1])

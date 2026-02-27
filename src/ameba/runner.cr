@@ -73,10 +73,11 @@ module Ameba
         config.autocorrect?,
         config.version,
         config.root,
+        config.cancellation_check,
       )
     end
 
-    protected def initialize(rules, sources, @formatter, @severity, @autocorrect = false, @version = nil, @root = Path[Dir.current])
+    protected def initialize(rules, sources, @formatter, @severity, @autocorrect = false, @version = nil, @root = Path[Dir.current], @cancellation_check : Proc(Nil)? = nil)
       @sources = sources.sort_by(&.path)
       @rules =
         rules.select(&->rule_runnable?(Rule::Base))
@@ -116,6 +117,7 @@ module Ameba
       channels = @sources.map { Channel(Exception?).new }
       @sources.zip(channels).each do |source, channel|
         spawn do
+          check_cancellation
           run_source(source)
         rescue ex
           channel.send(ex)
@@ -145,6 +147,7 @@ module Ameba
       # corrections are made (because automatic corrections can introduce new
       # issues). In the normal case the loop is only executed once.
       loop_unless_infinite(source, corrected_issues) do
+        check_cancellation
         # We have to reprocess the source to pick up any changes. Since a
         # change could (theoretically) introduce syntax errors, we break the
         # loop if we find any.
@@ -152,9 +155,11 @@ module Ameba
         break unless source.valid?
 
         @rules.each do |rule|
+          check_cancellation
           next if rule.excluded?(source, root)
           rule.test(source)
         end
+        check_cancellation
         check_unneeded_directives(source)
         break unless autocorrect? && source.correct!
 
@@ -250,6 +255,10 @@ module Ameba
       return unless rule.enabled?
 
       rule.test(source)
+    end
+
+    private def check_cancellation
+      @cancellation_check.try &.call
     end
   end
 end

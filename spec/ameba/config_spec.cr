@@ -161,6 +161,22 @@ module Ameba
         config.excluded = Set{"**/config_spec.cr"}
         config.sources.any?(&.fullpath.==(__FILE__)).should be_false
       end
+
+      it "allows overriding sources directly" do
+        source = Source.new("puts :ok\n", "memory.cr")
+        config.sources = [source]
+        config.sources.should eq [source]
+      end
+
+      it "allows clearing the source override" do
+        source = Source.new("puts :ok\n", "memory.cr")
+        config.sources = [source]
+        config.sources = nil
+        config.globs = Config::DEFAULT_GLOBS.dup
+        config.excluded = Config::DEFAULT_EXCLUDED.dup
+
+        config.sources.any?(&.fullpath.==(__FILE__)).should be_true
+      end
     end
 
     describe "#formatter, formatter=" do

@@ -46,6 +46,11 @@ module Ameba::CLI
         opts.stdin_filename.should eq "foo.cr"
       end
 
+      it "accepts --lsp flag" do
+        opts = CLI.parse_args %w[--lsp]
+        opts.lsp?.should be_true
+      end
+
       it "accepts --only flag" do
         opts = CLI.parse_args ["--only", "RULE1,RULE2"]
         opts.only.should eq Set{"RULE1", "RULE2"}

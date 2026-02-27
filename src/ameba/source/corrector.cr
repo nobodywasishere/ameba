@@ -196,5 +196,10 @@ class Ameba::Source
     def process
       @rewriter.process
     end
+
+    # Returns ordered rewrite operations represented by byte offsets.
+    def edits : Array(Rewriter::Edit)
+      @rewriter.edits
+    end
   end
 end
