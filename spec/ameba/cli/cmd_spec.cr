@@ -10,6 +10,17 @@ module Ameba::CLI
         r = CLI.run %w[-f silent file.cr]
         r.should be_true
       end
+
+      it "returns false for invalid semantic config" do
+        expect_raises(Exception, "Invalid analysis config") do
+          CLI.run %w[--semantic -f silent file.cr]
+        end
+      end
+
+      it "allows primitive semantic analysis without entrypoints" do
+        r = CLI.run %w[--analysis primitive_semantic -f silent file.cr]
+        r.should be_true
+      end
     end
 
     describe ".parse_args" do
@@ -46,6 +57,16 @@ module Ameba::CLI
         opts.stdin_filename.should eq "foo.cr"
       end
 
+      it "accepts --semantic flag" do
+        opts = CLI.parse_args %w[--semantic]
+        opts.analysis.should eq Analysis::TopLevelSemantic
+      end
+
+      it "accepts --analysis flag" do
+        opts = CLI.parse_args %w[--analysis primitive_semantic]
+        opts.analysis.should eq Analysis::PrimitiveSemantic
+      end
+
       it "accepts --only flag" do
         opts = CLI.parse_args ["--only", "RULE1,RULE2"]
         opts.only.should eq Set{"RULE1", "RULE2"}
@@ -74,6 +95,17 @@ module Ameba::CLI
       it "defaults all? flag to false" do
         opts = CLI.parse_args %w[file.cr]
         opts.all?.should be_false
+      end
+
+      it "defaults analysis to syntax" do
+        opts = CLI.parse_args %w[file.cr]
+        opts.analysis.should eq Analysis::Syntax
+      end
+
+      it "raises if analysis name is incorrect" do
+        expect_raises(Exception, "Incorrect analysis name JohnDoe") do
+          CLI.parse_args %w[--analysis JohnDoe]
+        end
       end
 
       it "accepts --all flag" do

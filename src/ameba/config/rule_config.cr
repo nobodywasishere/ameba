@@ -34,6 +34,9 @@ class Ameba::Config
         {% if key == "Severity" %}
           {% type = Severity %}
           {% converter = SeverityYamlConverter %}
+        {% elsif key == "AnalysisLevel" %}
+          {% type = Analysis %}
+          {% converter = AnalysisYamlConverter %}
         {% end %}
 
         {% unless type %}
@@ -169,6 +172,12 @@ class Ameba::Config
                 {% elsif prop[:type] == Severity %}
                   builder.field("$ref", "#/$defs/Severity")
                   builder.field("default", {{ prop[:default].capitalize }})
+
+                  {% default_set = true %}
+
+                {% elsif prop[:type] == Analysis %}
+                  builder.field("$ref", "#/$defs/Analysis")
+                  builder.field("default", {{ prop[:default].camelcase }})
 
                   {% default_set = true %}
 

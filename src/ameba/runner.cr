@@ -28,8 +28,11 @@ module Ameba
       end
     end
 
-    # A list of rules to do inspection based on.
-    @rules : Array(Rule::Base)
+    # Syntactic rules run during regular per-source inspection.
+    @syntactic_rules : Array(Rule::Base)
+
+    # Semantic rules run after syntactic inspection.
+    @semantic_rules : Array(Rule::Base)
 
     # Project root path.
     getter root : Path
@@ -46,11 +49,21 @@ module Ameba
     # A syntax rule which always inspects a source first
     @syntax_rule = Rule::Lint::Syntax.new
 
+    # A semantic rule that reports compiler semantic failures and returns
+    # semantic context when successful.
+    @semantic_rule = Rule::Lint::Semantic.new
+
     # Checks for unneeded disable directives. Always inspects a source last
     @unneeded_disable_directive_rule : Rule::Base?
 
     # Returns `true` if correctable issues should be autocorrected.
     private getter? autocorrect : Bool
+
+    # Configured analysis level.
+    private getter analysis : Analysis
+
+    # Semantic entrypoints configured in `.ameba.yml`.
+    @entrypoints : Array(String)
 
     # Returns an ameba version up to which the rules should be ran.
     property version : SemanticVersion?
@@ -68,18 +81,64 @@ module Ameba
       initialize(
         config.rules,
         config.sources,
+        config.entrypoints,
         config.formatter,
         config.severity,
         config.autocorrect?,
+        config.analysis,
         config.version,
         config.root,
       )
     end
 
-    protected def initialize(rules, sources, @formatter, @severity, @autocorrect = false, @version = nil, @root = Path[Dir.current])
+    protected def initialize(
+      rules : Array(Rule::Base),
+      sources : Array(Source),
+      entrypoints : Array(String),
+      formatter : Formatter::BaseFormatter,
+      severity : Severity,
+      autocorrect : Bool = false,
+      analysis : Analysis = :syntax,
+      version : SemanticVersion? = nil,
+      root : Path = Path[Dir.current],
+    )
+      @entrypoints = entrypoints
+      @formatter = formatter
+      @severity = severity
+      @autocorrect = autocorrect
+      @analysis = analysis
+      @version = version
+      @root = root
       @sources = sources.sort_by(&.path)
-      @rules =
-        rules.select(&->rule_runnable?(Rule::Base))
+      runnable_rules = rules.select(&->rule_runnable?(Rule::Base))
+      @syntactic_rules = runnable_rules.select(&.analysis_level.syntax?)
+      @semantic_rules = runnable_rules.reject(&.analysis_level.syntax?)
+      @unneeded_disable_directive_rule =
+        rules.find &.class.==(Rule::Lint::UnneededDisableDirective)
+    end
+
+    # Backward-compatible initializer used mostly by specs.
+    protected def initialize(
+      rules : Array(Rule::Base),
+      sources : Array(Source),
+      formatter : Formatter::BaseFormatter,
+      severity : Severity,
+      autocorrect : Bool = false,
+      version : SemanticVersion? = nil,
+      root : Path = Path[Dir.current],
+    )
+      @entrypoints = [] of String
+      @formatter = formatter
+      @severity = severity
+      @autocorrect = autocorrect
+      @analysis = :syntax
+      @version = version
+      @root = root
+      @sources = sources.sort_by(&.path)
+
+      runnable_rules = rules.select(&->rule_runnable?(Rule::Base))
+      @syntactic_rules = runnable_rules.select(&.analysis_level.syntax?)
+      @semantic_rules = runnable_rules.reject(&.analysis_level.syntax?)
       @unneeded_disable_directive_rule =
         rules.find &.class.==(Rule::Lint::UnneededDisableDirective)
     end
@@ -113,10 +172,33 @@ module Ameba
     def run
       @formatter.started @sources
 
+      run_sources do |source|
+        run_syntactic_source(source)
+      end
+
+      run_semantic_stage
+
+      run_sources do |source|
+        check_unneeded_directives(source)
+        source.issues.sort_by! do |issue|
+          {
+            issue.location.try(&.line_number) || 0,
+            issue.location.try(&.column_number) || 0,
+          }
+        end
+        @formatter.source_finished(source)
+      end
+
+      self
+    ensure
+      @formatter.finished @sources
+    end
+
+    private def run_sources(&block : Source -> Nil) : Nil
       channels = @sources.map { Channel(Exception?).new }
       @sources.zip(channels).each do |source, channel|
         spawn do
-          run_source(source)
+          block.call(source)
         rescue ex
           channel.send(ex)
         else
@@ -127,13 +209,50 @@ module Ameba
       channels.each do |chan|
         chan.receive.try { |ex| raise ex }
       end
-
-      self
-    ensure
-      @formatter.finished @sources
     end
 
-    private def run_source(source) : Nil
+    private def run_semantic_stage : Nil
+      if analysis.syntax?
+        @formatter.semantic_skipped(:syntax_only)
+        return
+      end
+
+      if syntax_errors_present?
+        @formatter.semantic_skipped(:syntax_error)
+        return
+      end
+
+      case analysis
+      when .primitive_semantic?
+        run_primitive_semantic_stage
+      when .top_level_semantic?, .full_semantic?
+        run_top_level_semantic_stage
+      end
+    end
+
+    private def run_top_level_semantic_stage : Nil
+      entrypoint_source = semantic_entrypoint_source
+      context = @semantic_rule.test(entrypoint_source)
+
+      run_sources do |source|
+        run_semantic_source(source, context)
+      end
+    end
+
+    private def run_primitive_semantic_stage : Nil
+      run_sources do |source|
+        context =
+          begin
+            SemanticContext.primitive_context(source.code, source.fullpath)
+          rescue
+            nil
+          end
+
+        run_semantic_source(source, context)
+      end
+    end
+
+    private def run_syntactic_source(source) : Nil
       @formatter.source_started source
 
       # This variable is a 2D array used to track corrected issues after each
@@ -151,11 +270,10 @@ module Ameba
         @syntax_rule.test(source)
         break unless source.valid?
 
-        @rules.each do |rule|
+        @syntactic_rules.each do |rule|
           next if rule.excluded?(source, root)
           rule.test(source)
         end
-        check_unneeded_directives(source)
         break unless autocorrect? && source.correct!
 
         # The issues that couldn't be corrected will be found again so we
@@ -169,14 +287,14 @@ module Ameba
       end
 
       File.write(source.path, source.code) unless corrected_issues.empty?
-    ensure
-      source.issues.sort_by! do |issue|
-        {
-          issue.location.try(&.line_number) || 0,
-          issue.location.try(&.column_number) || 0,
-        }
+    end
+
+    private def run_semantic_source(source, context : SemanticContext?) : Nil
+      @semantic_rules.each do |rule|
+        next unless analysis.supports?(rule.analysis_level)
+        next if rule.excluded?(source, root)
+        rule.test(source, context)
       end
-      @formatter.source_finished source
     end
 
     # Explains an issue at a specified *location*.
@@ -203,6 +321,28 @@ module Ameba
     # ```
     def success?
       @sources.all? &.issues.none? &.enabled?
+    end
+
+    private def syntax_errors_present?
+      @sources.any? do |source|
+        source.issues.any?(&.syntax?)
+      end
+    end
+
+    private def semantic_entrypoint_source : Source
+      unless @entrypoints.size == 1
+        raise "Invalid analysis config: `Entrypoints` must contain exactly one entrypoint for #{analysis}."
+      end
+
+      entrypoint = Path[@entrypoints.first].expand(root).to_s
+
+      source =
+        @sources.find do |item|
+          item.fullpath == entrypoint
+        end
+
+      source ||
+        raise "Unable to find semantic entrypoint source: #{entrypoint}"
     end
 
     private MAX_ITERATIONS = 200
@@ -246,6 +386,7 @@ module Ameba
     end
 
     private def check_unneeded_directives(source)
+      return if source.issues.any?(&.syntax?)
       return unless rule = @unneeded_disable_directive_rule
       return unless rule.enabled?
 

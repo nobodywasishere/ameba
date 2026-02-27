@@ -19,6 +19,7 @@
   - [Watch a tutorial](#watch-a-tutorial)
   - [Autocorrection](#autocorrection)
   - [Explain issues](#explain-issues)
+  - [Semantic analysis (opt-in)](#semantic-analysis-opt-in)
   - [Run in parallel](#run-in-parallel)
 - [Installation](#installation)
   - [As a project dependency:](#as-a-project-dependency)
@@ -96,6 +97,41 @@ report and paste behind the `ameba` command to check it out.
 $ ameba crystal/command/format.cr:26:83           # show explanation for the issue
 $ ameba --explain crystal/command/format.cr:26:83 # same thing
 ```
+
+### Semantic analysis (opt-in)
+
+Use `--analysis` to choose an analysis level:
+
+- `Syntax` (default): syntactic rules only.
+- `PrimitiveSemantic`: semantic rules with per-file primitive semantic context.
+- `TopLevelSemantic`: semantic rules plus compiler top-level semantic diagnostics.
+- `FullSemantic`: currently mapped to top-level semantic pipeline.
+
+```sh
+$ ameba --analysis primitive_semantic
+```
+
+`--semantic` is a shortcut for `--analysis top_level_semantic`:
+
+```sh
+$ ameba --semantic
+```
+
+Entrypoint-based levels (`TopLevelSemantic` and `FullSemantic`) require exactly one `Entrypoints` value in `.ameba.yml`:
+
+```yaml
+Entrypoints:
+  - src/main.cr
+```
+
+The entrypoint must exist and be part of selected lint targets (after `Globs` and `Excluded` are applied).
+
+Current semantic rule wave:
+
+- `Lint/UnknownType` (`PrimitiveSemantic` and above)
+- `Lint/UnknownMethod` (`PrimitiveSemantic` and above)
+- `Lint/NamespaceCollision` (`TopLevelSemantic` and above)
+- `Lint/Semantic` (compiler semantic diagnostics for entrypoint-based levels)
 
 ### Run in parallel
 
@@ -197,6 +233,10 @@ Generate new file by running `ameba --gen-config`.
 - `Excluded` section - an array of wildcards (or paths) to exclude from the
   source list defined by `Globs`. Defaults to `%w[lib]`, meaning it excludes the
   `lib` folder.
+- `Analysis` section - sets analysis level (`Syntax`, `PrimitiveSemantic`,
+  `TopLevelSemantic`, `FullSemantic`). Defaults to `Syntax`.
+- `Entrypoints` section - an array of semantic entrypoints used by entrypoint-based
+  analysis levels (`TopLevelSemantic` and `FullSemantic`). MVP supports exactly one entrypoint.
 
 In this example we define default globs and exclude `lib` and `src/compiler` folders:
 

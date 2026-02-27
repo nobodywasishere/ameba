@@ -20,6 +20,12 @@ module Ameba
         DummyRule.new.group.should eq "Ameba"
       end
     end
+
+    describe "#analysis_level" do
+      it "returns syntax by default" do
+        DummyRule.new.analysis_level.should eq Analysis::Syntax
+      end
+    end
   end
 
   describe Rule do

@@ -156,6 +156,162 @@ module Ameba
         end
       end
 
+      context "semantic stage" do
+        it "does not run semantic rules when analysis is syntax-only" do
+          rule = SemanticTrackingRule.new
+          source = Source.new("value : Int32 = 1\n", "source.cr")
+
+          Runner.new([rule] of Rule::Base, [source], formatter, default_severity).run
+          rule.inspected_sources.should be_empty
+        end
+
+        it "runs semantic rules in primitive semantic mode without entrypoint" do
+          rule = SemanticTrackingRule.new
+          source = Source.new("value : Int32 = 1\n", "source.cr")
+
+          Runner
+            .new([rule] of Rule::Base, [source], [] of String, formatter, default_severity, false, :primitive_semantic)
+            .run
+
+          rule.inspected_sources.should eq ["source.cr"]
+        end
+
+        it "runs primitive semantic rules for source with relative requires" do
+          base = File.tempname("ameba-semantic")
+          Dir.mkdir(base)
+
+          dependency = File.join(base, "dep.cr")
+          main = File.join(base, "main.cr")
+          File.write(dependency, "class Dep\nend\n")
+          source = Source.new("require \"./dep\"\nvalue : Dep = Dep.new\n", main)
+          rule = SemanticTrackingRule.new
+
+          Runner
+            .new([rule] of Rule::Base, [source], [] of String, formatter, default_severity, false, :primitive_semantic)
+            .run
+
+          rule.inspected_sources.should eq [main]
+        end
+
+        it "does not run top-level semantic rules in primitive semantic mode" do
+          rule = TopLevelSemanticTrackingRule.new
+          source = Source.new("value : Int32 = 1\n", "source.cr")
+
+          Runner
+            .new([rule] of Rule::Base, [source], [] of String, formatter, default_severity, false, :primitive_semantic)
+            .run
+
+          rule.inspected_sources.should be_empty
+        end
+
+        it "skips semantic rules when syntax errors are present" do
+          rule = SemanticTrackingRule.new
+          source = Source.new("def bad_syntax", "source.cr")
+
+          Runner
+            .new([rule] of Rule::Base, [source], [source.path], formatter, default_severity, false, :top_level_semantic)
+            .run
+
+          source.issues.any?(&.syntax?).should be_true
+          rule.inspected_sources.should be_empty
+        end
+
+        it "runs semantic rules when top-level semantic mode is enabled" do
+          rule = SemanticTrackingRule.new
+          source = Source.new("value : Int32 = 1\n", "source.cr")
+
+          Runner
+            .new([rule] of Rule::Base, [source], [source.path], formatter, default_severity, false, :top_level_semantic)
+            .run
+
+          rule.inspected_sources.should eq ["source.cr"]
+        end
+
+        it "reports semantic compiler errors" do
+          source = Source.new(%(require "./missing_file"\n), "source.cr")
+
+          Runner
+            .new([] of Rule::Base, [source], [source.path], formatter, default_severity, false, :top_level_semantic)
+            .run
+
+          source.issues.any? { |issue| issue.rule.is_a?(Rule::Lint::Semantic) }.should be_true
+        end
+
+        it "still runs semantic rules when top-level context fails to build" do
+          source = Source.new(<<-CRYSTAL, "source.cr")
+            module JSON
+              module Serializable
+                annotation Options
+                end
+              end
+            end
+
+            module Options
+            end
+
+            class Foo
+              include JSON::Serializable
+              include Options
+            end
+            CRYSTAL
+
+          rules = [Rule::Lint::NamespaceCollision.new] of Rule::Base
+          Runner
+            .new(rules, [source], [source.path], formatter, default_severity, false, :top_level_semantic)
+            .run
+
+          source.issues.any? { |issue| issue.rule.is_a?(Rule::Lint::Semantic) }.should be_true
+          source.issues.any? { |issue| issue.rule.is_a?(Rule::Lint::NamespaceCollision) }.should be_true
+        end
+
+        it "fails fast when semantic entrypoint source is missing" do
+          source = Source.new("value : Int32 = 1\n", "source.cr")
+
+          expect_raises(Exception) do
+            Runner
+              .new([] of Rule::Base, [source], ["missing.cr"], formatter, default_severity, false, :top_level_semantic)
+              .run
+          end
+        end
+
+        it "fails with a clear message when top-level analysis has no entrypoint" do
+          source = Source.new("value : Int32 = 1\n", "source.cr")
+          message = "Invalid analysis config: `Entrypoints` must contain exactly one entrypoint for TopLevelSemantic."
+
+          expect_raises(Exception, message) do
+            Runner
+              .new([] of Rule::Base, [source], [] of String, formatter, default_severity, false, :top_level_semantic)
+              .run
+          end
+        end
+
+        it "runs unneeded-disable checks after semantic rules" do
+          source = Source.new(<<-CRYSTAL, "source.cr")
+            # ameba:disable Lint/UnknownType
+            value : UnknownType = 1
+            CRYSTAL
+          rules = [Rule::Lint::UnknownType.new, Rule::Lint::UnneededDisableDirective.new] of Rule::Base
+
+          Runner
+            .new(rules, [source], [] of String, formatter, default_severity, false, :primitive_semantic)
+            .run
+
+          source.issues.any? { |issue| issue.rule.is_a?(Rule::Lint::UnneededDisableDirective) }.should be_false
+          source.issues.any? { |issue| issue.rule.is_a?(Rule::Lint::UnknownType) && issue.disabled? }.should be_true
+        end
+
+        it "emits one formatter source completion per source in semantic mode" do
+          semantic_formatter = CountingFormatter.new
+          source = Source.new("value : Int32 = 1\n", "source.cr")
+
+          Runner
+            .new([] of Rule::Base, [source], [] of String, semantic_formatter, default_severity, false, :primitive_semantic)
+            .run
+
+          semantic_formatter.finished_paths.should eq ["source.cr"]
+        end
+      end
+
       context "unneeded disables" do
         it "reports an issue if such disable exists" do
           rules = [Rule::Lint::UnneededDisableDirective.new] of Rule::Base

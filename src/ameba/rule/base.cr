@@ -3,6 +3,7 @@ module Ameba::Rule
   # behave differently than usual rules.
   SPECIAL = {
     Lint::Syntax.rule_name,
+    Lint::Semantic.rule_name,
     Lint::UnneededDisableDirective.rule_name,
   }
 
@@ -39,6 +40,12 @@ module Ameba::Rule
       AST::NodeVisitor.new self, source
     end
 
+    # Semantic rules may override this method and use semantic context.
+    # Non-semantic rules fall back to regular source-based testing.
+    def test(source : Source, context : SemanticContext?)
+      test(source)
+    end
+
     # NOTE: Can't be abstract
     def test(source : Source, node : Crystal::ASTNode, *opts)
     end
@@ -50,8 +57,8 @@ module Ameba::Rule
     # source = MyRule.new.catch(source)
     # source.valid?
     # ```
-    def catch(source : Source)
-      source.tap { test source }
+    def catch(source : Source, context : SemanticContext? = nil)
+      source.tap { test source, context }
     end
 
     # Returns a name of this rule, which is basically a class name.
@@ -109,6 +116,14 @@ module Ameba::Rule
     # ```
     def special?
       name.in?(SPECIAL)
+    end
+
+    # Minimum analysis level required for this rule to run.
+    #
+    # Rules that return a semantic level (> `Syntax`) are executed only when
+    # the configured analysis level meets or exceeds this value.
+    def analysis_level : Analysis
+      Analysis::Syntax
     end
 
     def_equals_and_hash name

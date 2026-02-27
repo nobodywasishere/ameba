@@ -23,6 +23,23 @@ module Ameba::Formatter
       @mutex.synchronize { output << sym }
     end
 
+    def semantic_skipped(reason : Symbol) : Nil
+      message =
+        case reason
+        when :syntax_only
+          "Semantic checks skipped: analysis mode is `Syntax`."
+        when :syntax_error
+          "Semantic checks skipped: syntax errors were found."
+        else
+          "Semantic checks skipped."
+        end
+
+      @mutex.synchronize do
+        output << "\n"
+        output.puts message.colorize(:yellow)
+      end
+    end
+
     # Reports a message when inspection is finished.
     def finished(sources) : Nil
       output.flush

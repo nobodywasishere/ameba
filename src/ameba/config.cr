@@ -58,6 +58,15 @@ class Ameba::Config
     @version = SemanticVersion.parse(version)
   end
 
+  # Sets analysis mode from string.
+  #
+  # ```
+  # config.analysis = "top_level_semantic"
+  # ```
+  def analysis=(analysis : String)
+    @analysis = Analysis.parse(analysis)
+  end
+
   # Returns a formatter to be used while inspecting files.
   # If formatter is not set, it will return default formatter.
   #
@@ -106,6 +115,12 @@ class Ameba::Config
   # Returns `true` if correctable issues should be autocorrected.
   property? autocorrect = false
 
+  # Configured analysis pipeline level.
+  property analysis : Analysis = :syntax
+
+  # Entrypoints used to build semantic context.
+  property entrypoints : Array(String)
+
   # Returns a filename if reading source file from STDIN.
   property stdin_filename : String?
 
@@ -119,11 +134,14 @@ class Ameba::Config
     @root = nil,
     @globs = Set(String).new,
     @excluded = Set(String).new,
+    @entrypoints = [] of String,
     @autocorrect = false,
     @stdin_filename = nil,
+    analysis = nil,
     version = nil,
     formatter = nil,
   )
+    @analysis = Analysis::Syntax
     @rule_groups = @rules.group_by &.group
 
     if version
@@ -131,6 +149,9 @@ class Ameba::Config
     end
     if formatter
       self.formatter = formatter
+    end
+    if analysis
+      self.analysis = analysis
     end
   end
 

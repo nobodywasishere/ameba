@@ -14,6 +14,18 @@
         "Convention"
       ]
     },
+    "Analysis": {
+      "type": "string",
+      "title": "Analysis pipeline level",
+      "description": "Controls whether semantic stages are executed",
+      "default": "Syntax",
+      "enum": [
+        "Syntax",
+        "PrimitiveSemantic",
+        "TopLevelSemantic",
+        "FullSemantic"
+      ]
+    },
     "Globs": {
       "type": "array",
       "title": "Globbed files and paths",
@@ -35,6 +47,17 @@
         "examples": [
           "spec/fixtures/**",
           "spec/**/*.manual_spec.cr"
+        ]
+      }
+    },
+    "Entrypoints": {
+      "type": "array",
+      "title": "Semantic analysis entrypoints",
+      "description": "Entrypoints used by entrypoint-based analysis levels",
+      "items": {
+        "type": "string",
+        "examples": [
+          "src/main.cr"
         ]
       }
     },
@@ -85,11 +108,17 @@
         }
       }
     },
+    "Analysis": {
+      "$ref": "#/$defs/Analysis"
+    },
     "Globs": {
       "$ref": "#/$defs/Globs"
     },
     "Excluded": {
       "$ref": "#/$defs/Excluded"
+    },
+    "Entrypoints": {
+      "$ref": "#/$defs/Entrypoints"
     },
     "Documentation/Admonition": {
       "$ref": "#/$defs/BaseRule",
@@ -618,6 +647,26 @@
         }
       }
     },
+    "Lint/NamespaceCollision": {
+      "$ref": "#/$defs/BaseRule",
+      "$comment": "https://crystal-ameba.github.io/ameba/master/Ameba/Rule/Lint/NamespaceCollision.html",
+      "title": "Lint/NamespaceCollision",
+      "description": "Reports ambiguous path references and namespace collisions",
+      "properties": {
+        "SinceVersion": {
+          "type": "string",
+          "default": "1.8.0"
+        },
+        "Severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "Error"
+        },
+        "AnalysisLevel": {
+          "$ref": "#/$defs/Analysis",
+          "default": "TopLevelSemantic"
+        }
+      }
+    },
     "Lint/NotNil": {
       "$ref": "#/$defs/BaseRule",
       "$comment": "https://crystal-ameba.github.io/ameba/master/Ameba/Rule/Lint/NotNil.html",
@@ -767,6 +816,22 @@
         "Severity": {
           "$ref": "#/$defs/Severity",
           "default": "Warning"
+        }
+      }
+    },
+    "Lint/Semantic": {
+      "$ref": "#/$defs/BaseRule",
+      "$comment": "https://crystal-ameba.github.io/ameba/master/Ameba/Rule/Lint/Semantic.html",
+      "title": "Lint/Semantic",
+      "description": "Reports invalid Crystal top-level semantics",
+      "properties": {
+        "SinceVersion": {
+          "type": "string",
+          "default": "1.8.0"
+        },
+        "Severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "Error"
         }
       }
     },
@@ -998,6 +1063,46 @@
         "Severity": {
           "$ref": "#/$defs/Severity",
           "default": "Warning"
+        }
+      }
+    },
+    "Lint/UnknownMethod": {
+      "$ref": "#/$defs/BaseRule",
+      "$comment": "https://crystal-ameba.github.io/ameba/master/Ameba/Rule/Lint/UnknownMethod.html",
+      "title": "Lint/UnknownMethod",
+      "description": "Reports unknown methods on explicitly inferred receiver types",
+      "properties": {
+        "SinceVersion": {
+          "type": "string",
+          "default": "1.8.0"
+        },
+        "Severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "Error"
+        },
+        "AnalysisLevel": {
+          "$ref": "#/$defs/Analysis",
+          "default": "PrimitiveSemantic"
+        }
+      }
+    },
+    "Lint/UnknownType": {
+      "$ref": "#/$defs/BaseRule",
+      "$comment": "https://crystal-ameba.github.io/ameba/master/Ameba/Rule/Lint/UnknownType.html",
+      "title": "Lint/UnknownType",
+      "description": "Reports unknown types in explicit type restrictions",
+      "properties": {
+        "SinceVersion": {
+          "type": "string",
+          "default": "1.8.0"
+        },
+        "Severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "Error"
+        },
+        "AnalysisLevel": {
+          "$ref": "#/$defs/Analysis",
+          "default": "PrimitiveSemantic"
         }
       }
     },

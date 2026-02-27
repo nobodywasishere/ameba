@@ -29,6 +29,10 @@ module Ameba::Formatter
     # WARNING: This method needs to be MT safe
     def source_finished(source : Source) : Nil; end
 
+    # Callback for semantic stage skip notifications.
+    # Reason values are formatter-specific symbols.
+    def semantic_skipped(reason : Symbol) : Nil; end
+
     # Callback that indicates when inspection is finished.
     # A list of inspected sources is passed as an argument.
     def finished(sources) : Nil; end

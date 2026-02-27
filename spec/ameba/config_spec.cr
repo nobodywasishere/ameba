@@ -91,6 +91,55 @@ module Ameba
           Config.from_yaml(yaml)
         end
       end
+
+      it "initializes entrypoints as string" do
+        yaml = YAML.parse <<-YAML
+          ---
+          Entrypoints: src/main.cr
+          YAML
+        config = Config.from_yaml(yaml)
+        config.entrypoints.should eq ["src/main.cr"]
+      end
+
+      it "initializes entrypoints as array" do
+        yaml = YAML.parse <<-YAML
+          ---
+          Entrypoints:
+            - src/main.cr
+            - src/worker.cr
+          YAML
+        config = Config.from_yaml(yaml)
+        config.entrypoints.should eq ["src/main.cr", "src/worker.cr"]
+      end
+
+      it "raises if Entrypoints has a wrong type" do
+        yaml = YAML.parse <<-YAML
+          ---
+          Entrypoints: false
+          YAML
+        expect_raises(Exception, "Incorrect `Entrypoints` section in a config file") do
+          Config.from_yaml(yaml)
+        end
+      end
+
+      it "initializes analysis from string" do
+        yaml = YAML.parse <<-YAML
+          ---
+          Analysis: primitive_semantic
+          YAML
+        config = Config.from_yaml(yaml)
+        config.analysis.should eq Analysis::PrimitiveSemantic
+      end
+
+      it "raises if Analysis has an unknown value" do
+        yaml = YAML.parse <<-YAML
+          ---
+          Analysis: unknown_mode
+          YAML
+        expect_raises(Exception, "Incorrect analysis name unknown_mode") do
+          Config.from_yaml(yaml)
+        end
+      end
     end
 
     describe ".load" do
@@ -140,6 +189,38 @@ module Ameba
       it "allows to set excluded" do
         config.excluded = Set{"spec"}
         config.excluded.should eq Set{"spec"}
+      end
+    end
+
+    describe "#entrypoints, #entrypoints=" do
+      config = Config.load config_sample
+
+      it "defaults to an empty list" do
+        config.entrypoints.should be_empty
+      end
+
+      it "allows to set entrypoints" do
+        entrypoints = ["src/main.cr"]
+        config.entrypoints = entrypoints
+        config.entrypoints.should eq entrypoints
+      end
+    end
+
+    describe "#analysis, #analysis=" do
+      config = Config.load config_sample
+
+      it "defaults to syntax analysis" do
+        config.analysis.should eq Analysis::Syntax
+      end
+
+      it "allows to set analysis as enum value" do
+        config.analysis = Analysis::TopLevelSemantic
+        config.analysis.should eq Analysis::TopLevelSemantic
+      end
+
+      it "allows to set analysis as string" do
+        config.analysis = "primitive_semantic"
+        config.analysis.should eq Analysis::PrimitiveSemantic
       end
     end
 

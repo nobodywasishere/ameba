@@ -102,6 +102,7 @@ module Ameba::Spec::ExpectIssue
                    *,
                    file = __FILE__,
                    line = __LINE__,
+                   semantic = false,
                    **replacements)
     annotated_code = format_issue(annotated_code, **replacements)
     expected_annotations = AnnotatedSource.parse(annotated_code)
@@ -112,7 +113,9 @@ module Ameba::Spec::ExpectIssue
       raise "Use `expect_no_issues` to assert that no issues are found"
     end
 
-    source, actual_annotations = actual_annotations(rules, code, path, lines)
+    context = semantic_context(code, semantic, path, file, line)
+
+    source, actual_annotations = actual_annotations(rules, code, path, lines, context)
     unless actual_annotations == expected_annotations
       fail <<-MSG, file, line
         Expected:
@@ -157,11 +160,14 @@ module Ameba::Spec::ExpectIssue
                        code : String,
                        path = "",
                        *,
+                       semantic = false,
                        file = __FILE__,
                        line = __LINE__)
     lines = code.split('\n') # must preserve trailing newline
 
-    _, actual_annotations = actual_annotations(rules, code, path, lines)
+    context = semantic_context(code, semantic, path, file, line)
+
+    _, actual_annotations = actual_annotations(rules, code, path, lines, context)
     return if actual_annotations.to_s == code
 
     fail <<-MSG, file, line
@@ -171,24 +177,48 @@ module Ameba::Spec::ExpectIssue
       MSG
   end
 
-  private def actual_annotations(rules, code, path, lines)
+  private def actual_annotations(rules, code, path, lines, context = nil)
     source = Source.new(code, path, normalize: false)
     if rules.is_a?(Enumerable)
-      rules.each(&.catch(source))
+      rules.each(&.catch(source, context))
     else
-      rules.catch(source)
+      rules.catch(source, context)
     end
     {source, AnnotatedSource.new(lines, source.issues)}
+  end
+
+  private def semantic_context(code, semantic, path, file, line)
+    return unless semantic
+
+    semantic_path = path.presence || "source.cr"
+    SemanticContext.primitive_context(code, semantic_path)
+  rescue ex
+    fail <<-MSG, file, line
+      Semantic analysis failed:
+
+      #{ex}
+
+      #{ex.backtrace.try &.join("\n")}
+      MSG
   end
 
   private def format_issue(code, **replacements)
     replacements.each do |keyword, value|
       value = value.to_s
+      placeholder = marker('%', keyword)
+      cursor = marker('^', keyword)
+      spacer = marker('_', keyword)
       code = code
-        .gsub("%{#{keyword}}", value)
-        .gsub("^{#{keyword}}", "^" * value.size)
-        .gsub("_{#{keyword}}", " " * value.size)
+        .gsub(placeholder, value)
+        .gsub(cursor, "^" * value.size)
+        .gsub(spacer, " " * value.size)
     end
     code
+  end
+
+  private def marker(prefix : Char, keyword) : String
+    String.build do |io|
+      io << prefix << '{' << keyword << '}'
+    end
   end
 end

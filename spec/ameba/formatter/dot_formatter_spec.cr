@@ -31,6 +31,18 @@ module Ameba::Formatter
       end
     end
 
+    describe "#semantic_skipped" do
+      it "reports syntax-only analysis mode" do
+        subject.semantic_skipped(:syntax_only)
+        output.to_s.should contain "Semantic checks skipped: analysis mode is `Syntax`."
+      end
+
+      it "reports syntax errors blocking semantic mode" do
+        subject.semantic_skipped(:syntax_error)
+        output.to_s.should contain "Semantic checks skipped: syntax errors were found."
+      end
+    end
+
     describe "#finished" do
       it "writes a final message" do
         subject.finished [Source.new]

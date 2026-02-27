@@ -49,6 +49,48 @@ module Ameba
     end
   end
 
+  class SemanticTrackingRule < Rule::Base
+    @[YAML::Field(ignore: true)]
+    getter inspected_sources = [] of String
+
+    @[YAML::Field(ignore: true)]
+    @mutex = Mutex.new
+
+    properties do
+      description "Internal rule to test semantic runner stage"
+      analysis_level :primitive_semantic
+    end
+
+    def test(source, context : SemanticContext?)
+      return unless context
+
+      @mutex.synchronize do
+        inspected_sources << source.path
+      end
+    end
+  end
+
+  class TopLevelSemanticTrackingRule < Rule::Base
+    @[YAML::Field(ignore: true)]
+    getter inspected_sources = [] of String
+
+    @[YAML::Field(ignore: true)]
+    @mutex = Mutex.new
+
+    properties do
+      description "Internal rule to test top-level semantic runner stage"
+      analysis_level :top_level_semantic
+    end
+
+    def test(source, context : SemanticContext?)
+      return unless context
+
+      @mutex.synchronize do
+        inspected_sources << source.path
+      end
+    end
+  end
+
   class ScopeRule < Rule::Base
     @[YAML::Field(ignore: true)]
     getter scopes = [] of AST::Scope
@@ -299,6 +341,17 @@ module Ameba
 
     def finished(sources)
       @finished_sources = sources
+    end
+  end
+
+  class CountingFormatter < Formatter::BaseFormatter
+    getter finished_paths = [] of String
+    @mutex = Mutex.new
+
+    def source_finished(source : Source)
+      @mutex.synchronize do
+        finished_paths << source.path
+      end
     end
   end
 

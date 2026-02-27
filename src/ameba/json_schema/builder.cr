@@ -37,6 +37,22 @@ module Ameba::JSONSchema::Builder
             end
           end
 
+          builder.string("Analysis")
+          builder.object do
+            builder.field("type", "string")
+            builder.field("title", "Analysis pipeline level")
+            builder.field("description",
+              "Controls whether semantic stages are executed")
+            builder.field("default", Analysis::Syntax.to_s)
+
+            builder.string("enum")
+            builder.array do
+              Analysis.values.each do |value|
+                builder.string(value.to_s)
+              end
+            end
+          end
+
           builder.string("Globs")
           builder.object do
             builder.field("type", "array")
@@ -71,6 +87,24 @@ module Ameba::JSONSchema::Builder
               builder.array do
                 builder.string("spec/fixtures/**")
                 builder.string("spec/**/*.manual_spec.cr")
+              end
+            end
+          end
+
+          builder.string("Entrypoints")
+          builder.object do
+            builder.field("type", "array")
+            builder.field("title", "Semantic analysis entrypoints")
+            builder.field("description",
+              "Entrypoints used by entrypoint-based analysis levels")
+
+            builder.string("items")
+            builder.object do
+              builder.field("type", "string")
+
+              builder.string("examples")
+              builder.array do
+                builder.string("src/main.cr")
               end
             end
           end
@@ -141,6 +175,11 @@ module Ameba::JSONSchema::Builder
             end
           end
 
+          builder.string("Analysis")
+          builder.object do
+            builder.field("$ref", "#/$defs/Analysis")
+          end
+
           builder.string("Globs")
           builder.object do
             builder.field("$ref", "#/$defs/Globs")
@@ -149,6 +188,11 @@ module Ameba::JSONSchema::Builder
           builder.string("Excluded")
           builder.object do
             builder.field("$ref", "#/$defs/Excluded")
+          end
+
+          builder.string("Entrypoints")
+          builder.object do
+            builder.field("$ref", "#/$defs/Entrypoints")
           end
 
           Rule.rules.each do |rule|

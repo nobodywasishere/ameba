@@ -25,6 +25,8 @@ module Ameba::CLI
     property? colors = true
     property? without_affected_code = false
     property? autocorrect = false
+    property analysis : Analysis = :syntax
+    property? analysis_explicit = false
   end
 
   private class ExitException < Exception
@@ -193,6 +195,20 @@ module Ameba::CLI
       parser.on("--stdin-filename FILENAME", "Read source from STDIN") do |filename|
         opts.stdin_filename = filename if filename.presence
       end
+
+      parser.on("--semantic",
+        "Shortcut for --analysis top_level_semantic") do
+        opts.analysis = :top_level_semantic
+        opts.analysis_explicit = true
+      end
+
+      parser.on("--analysis LEVEL",
+        "Set analysis level: #{Analysis.values.join(", ")}") do |level|
+        if level.presence
+          opts.analysis = Analysis.parse(level)
+          opts.analysis_explicit = true
+        end
+      end
     end
 
     opts
@@ -205,6 +221,9 @@ module Ameba::CLI
       skip_reading_config: opts.skip_reading_config?,
     )
     config.autocorrect = opts.autocorrect?
+    if opts.analysis_explicit?
+      config.analysis = opts.analysis
+    end
     config.stdin_filename = opts.stdin_filename
 
     if version = opts.version
@@ -222,6 +241,7 @@ module Ameba::CLI
 
     configure_formatter(config, opts)
     configure_rules(config, opts)
+    validate_analysis_config(config, opts)
 
     config
   end
@@ -306,6 +326,29 @@ module Ameba::CLI
   private def configure_describe_opts(rule_name, opts) : Nil
     opts.describe_rule = rule_name.presence
     opts.formatter = :silent
+  end
+
+  private def validate_analysis_config(config, opts) : Nil
+    analysis = config.analysis
+    return unless analysis.entrypoint?
+
+    if opts.stdin_filename
+      raise "Invalid usage: #{analysis} analysis does not support stdin."
+    end
+
+    if config.entrypoints.size != 1
+      raise "Invalid analysis config: `Entrypoints` must contain exactly one entrypoint for #{analysis}."
+    end
+
+    entrypoint = Path[config.entrypoints.first].expand(config.root).to_s
+    unless File.exists?(entrypoint)
+      raise "Invalid analysis config: Entrypoint `#{entrypoint}` does not exist."
+    end
+
+    selected_files = config.files.map { |path| File.expand_path(path) }.to_set
+    unless selected_files.includes?(File.expand_path(entrypoint))
+      raise "Invalid analysis config: Entrypoint `#{entrypoint}` must be part of lint targets."
+    end
   end
 
   private def configure_explain_opts(loc, opts) : Nil
