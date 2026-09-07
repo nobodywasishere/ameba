@@ -41,7 +41,7 @@ module Ameba::Rule::Lint
       prefix_size = {{ "# ameba:".size }}
 
       issue_for name_location_or(token, action, adjust_location_column_number: prefix_size),
-        MSG % {action, AVAILABLE_ACTIONS.map { |name| "`#{name}`" }.join(", ")}
+        MSG % {action, AVAILABLE_ACTIONS.join(", ") { |name| "`#{name}`" }}
     end
   end
 end

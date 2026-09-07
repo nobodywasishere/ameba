@@ -49,7 +49,7 @@ module Ameba::Rule::Naming
       return if (arg = node.args.first).name.in?(allowed_names)
 
       opts =
-        allowed_names.map { |val| "`#{val}`" }.join(" or ")
+        allowed_names.join(" or ") { |val| "`#{val}`" }
 
       issue_for(arg, MSG % {name, opts}, prefer_name_location: true)
     end

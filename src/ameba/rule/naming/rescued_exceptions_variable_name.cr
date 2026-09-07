@@ -44,7 +44,7 @@ module Ameba::Rule::Naming
         allowed_names.size == 1 ? MSG_SINGULAR : MSG
 
       issue_for name_location_or(node, adjust_location_column_number: {{ "rescue ".size }}),
-        message % allowed_names.map { |val| "`#{val}`" }.join(", ")
+        message % allowed_names.join(", ") { |val| "`#{val}`" }
     end
   end
 end

@@ -45,7 +45,7 @@ module Ameba::Rule::Lint
       token_value = token.value.to_s[prefix_size - 1...-1]?
 
       issue_for name_location_or(token, token_value, adjust_location_column_number: prefix_size),
-        MSG % bad_names.map { |name| "`#{name}`" }.join(", ")
+        MSG % bad_names.join(", ") { |name| "`#{name}`" }
     end
   end
 end

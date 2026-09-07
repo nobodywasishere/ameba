@@ -45,7 +45,7 @@ module Ameba::Rule::Lint
         next unless names = unneeded_disables(source, rules, token.location, excluded_rules)
         next unless names.present?
 
-        message = MSG % names.map { |name| "`#{name}`" }.join(", ")
+        message = MSG % names.join(", ") { |name| "`#{name}`" }
         location = name_location_or(token, token.value)
 
         issue_for(*location, message) do |corrector|

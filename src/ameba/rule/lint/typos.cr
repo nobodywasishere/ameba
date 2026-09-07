@@ -86,7 +86,7 @@ module Ameba::Rule::Lint
       typos.try &.each do |typo|
         corrections = typo.corrections
         message = MSG % {
-          typo.typo, corrections.map { |correction| "`#{correction}`" }.join(" | "),
+          typo.typo, corrections.join(" | ") { |correction| "`#{correction}`" },
         }
         if corrections.size == 1
           issue_for(typo.location, typo.end_location, message) do |corrector|
